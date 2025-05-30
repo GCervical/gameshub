@@ -1,0 +1,18 @@
+<h2>Resumen de Estadísticas de Juegos</h2>
+
+<ul>
+  <li>Juegos disponibles en la plataforma: <b>{{ totalJuegos }}</b></li>
+  <li>Juegos que se pueden descargar gratis: <b>{{ juegosGratis }}</b></li>
+  <li>Juegos que requieren pago: <b>{{ juegosPago }}</b></li>
+  <li>
+    Juego mejor valorado:
+    <ng-container *ngIf="mejorJuego">
+      <b>{{ mejorJuego.nombre }}</b>
+      <span> (Calificación: {{ mejorJuego.rating }})</span>
+    </ng-container>
+  </li>
+  <li>
+    Precio promedio de los juegos de pago:
+    <b>{{ promedioPrecio | currency:'USD':'symbol':'1.2-2' }}</b>
+  </li>
+</ul>

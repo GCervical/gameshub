@@ -24,11 +24,27 @@
           </div>
         </div>
       </div>
-      <div class="col-lg-4 d-flex align-items-end justify-content-lg-end">
+
+      <div class="col-lg-4 d-flex align-items-end justify-content-lg-end flex-wrap gap-2">
         <div class="results-info">
           <span class="badge-gaming secondary">
             {{mostrandoResultados}} juegos encontrados
           </span>
+        </div>
+
+        <!-- Selector de ordenamiento -->
+        <div class="ordenamiento">
+          <select
+            class="form-select input-gaming"
+            [(ngModel)]="ordenSeleccionado"
+            (change)="buscar()">
+            <option value="">Ordenar por</option>
+            <option value="nombreAsc">Nombre A-Z</option>
+            <option value="nombreDesc">Nombre Z-A</option>
+            <option value="precioAsc">Precio menor a mayor</option>
+            <option value="precioDesc">Precio mayor a menor</option>
+            <option value="ratingDesc">Mejor rating</option>
+          </select>
         </div>
       </div>
     </div>
@@ -51,7 +67,7 @@
           <app-filtros (filtrosChange)="onFiltrosChange($event)"></app-filtros>
         </div>
       </div>
-      
+
       <!-- Lista de juegos -->
       <div class="col-lg-9">
         @if(juegosFiltrados$ | async; as juegos) {

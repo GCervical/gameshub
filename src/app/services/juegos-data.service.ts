@@ -131,5 +131,43 @@ export class JuegosDataService {
         };
       })
     );
+     
   }
+    // Método 3: Ordenar juegos según criterio
+    ordenarJuegos(criterio: string, ascendente: boolean = true): Observable<Juego[]> {
+      return this.juegos$.pipe(
+        map(juegos => {
+          let juegosOrdenados = [...juegos];
+
+          switch (criterio) {
+            case 'nombre':
+              juegosOrdenados.sort((a, b) => 
+                ascendente 
+                  ? a.nombre.localeCompare(b.nombre) 
+                  : b.nombre.localeCompare(a.nombre)
+              );
+              break;
+            case 'precio':
+              juegosOrdenados.sort((a, b) => 
+                ascendente 
+                  ? a.precio - b.precio 
+                  : b.precio - a.precio
+              );
+              break;
+            case 'rating':
+              juegosOrdenados.sort((a, b) => 
+                ascendente 
+                  ? a.rating - b.rating 
+                  : b.rating - a.rating
+              );
+              break;
+            default:
+              // Si no se reconoce el criterio, se devuelve la lista sin cambios
+              break;
+          }
+          return juegosOrdenados;
+        })
+      );
+    }
+
 }

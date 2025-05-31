@@ -18,7 +18,7 @@ import { FiltrosComponent } from '../filtros/filtros.component';
 export class ListaJuegosComponent implements OnInit {
   juegos$!: Observable<Juego[]>;
   juegosFiltrados$!: Observable<Juego[]>;
-  
+
   private filtrosSubject = new BehaviorSubject<any>({
     busqueda: '',
     categoria: '',
@@ -26,20 +26,23 @@ export class ListaJuegosComponent implements OnInit {
     precio: '',
     rating: 0
   });
-  
+
   filtros$ = this.filtrosSubject.asObservable();
   terminoBusqueda = '';
   categoriaSeleccionada = '';
   mostrandoResultados = 0;
-  
+
+  // Nueva propiedad para selector de ordenamiento
+  ordenSeleccionado = '';
+
   constructor(
     private juegosService: JuegosDataService,
     private route: ActivatedRoute
   ) {}
-  
+
   ngOnInit(): void {
     this.juegos$ = this.juegosService.obtenerJuegos();
-    
+
     // Verificar si viene de una categoría específica
     this.route.params.subscribe(params => {
       if (params['id']) {
@@ -47,15 +50,15 @@ export class ListaJuegosComponent implements OnInit {
         this.actualizarFiltros();
       }
     });
-    
-    // Combinar juegos con filtros
+
+    // Combinar juegos con filtros y ordenamiento
     this.juegosFiltrados$ = combineLatest([
       this.juegos$,
       this.filtros$
     ]).pipe(
       map(([juegos, filtros]) => {
         let resultado = juegos;
-        
+
         // Filtro por búsqueda
         if (filtros.busqueda) {
           resultado = resultado.filter(juego =>
@@ -64,50 +67,53 @@ export class ListaJuegosComponent implements OnInit {
             juego.categoria.toLowerCase().includes(filtros.busqueda.toLowerCase())
           );
         }
-        
+
         // Filtro por categoría
         if (filtros.categoria) {
           resultado = resultado.filter(juego =>
             juego.categoria.toLowerCase() === filtros.categoria.toLowerCase()
           );
         }
-        
+
         // Filtro por plataforma
         if (filtros.plataforma) {
           resultado = resultado.filter(juego =>
             juego.plataformas.includes(filtros.plataforma)
           );
         }
-        
+
         // Filtro por precio
         if (filtros.precio === 'gratis') {
           resultado = resultado.filter(juego => juego.esGratis);
         } else if (filtros.precio === 'pago') {
           resultado = resultado.filter(juego => !juego.esGratis);
         }
-        
+
         // Filtro por rating
         if (filtros.rating > 0) {
           resultado = resultado.filter(juego => juego.rating >= filtros.rating);
         }
-        
+
+        // Ordenamiento
+        resultado = this.ordenarJuegos(resultado, this.ordenSeleccionado);
+
         this.mostrandoResultados = resultado.length;
         return resultado;
       })
     );
   }
-  
+
   buscar(): void {
     this.actualizarFiltros();
   }
-  
+
   onFiltrosChange(filtros: any): void {
     this.filtrosSubject.next({
       ...this.filtrosSubject.value,
       ...filtros
     });
   }
-  
+
   limpiarFiltros(): void {
     this.terminoBusqueda = '';
     this.categoriaSeleccionada = '';
@@ -119,12 +125,36 @@ export class ListaJuegosComponent implements OnInit {
       rating: 0
     });
   }
-  
+
   private actualizarFiltros(): void {
     this.filtrosSubject.next({
       ...this.filtrosSubject.value,
       busqueda: this.terminoBusqueda,
       categoria: this.categoriaSeleccionada
     });
+  }
+
+  // Nueva función para ordenar juegos según opción seleccionada
+  ordenarJuegos(juegos: Juego[], orden: string): Juego[] {
+    switch (orden) {
+      case 'nombreAsc':
+        return juegos.sort((a, b) => a.nombre.localeCompare(b.nombre));
+      case 'nombreDesc':
+        return juegos.sort((a, b) => b.nombre.localeCompare(a.nombre));
+      case 'precioAsc':
+        return juegos.sort((a, b) => a.precio - b.precio);
+      case 'precioDesc':
+        return juegos.sort((a, b) => b.precio - a.precio);
+      case 'ratingDesc':
+        return juegos.sort((a, b) => b.rating - a.rating);
+      default:
+        return juegos;
+    }
+  }
+
+  // Cambiar valor del selector de ordenamiento
+  onOrdenSeleccionado(orden: string): void {
+    this.ordenSeleccionado = orden;
+    this.actualizarFiltros();
   }
 }
